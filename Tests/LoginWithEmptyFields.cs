@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 using PlaywrightTests.Pages;
+using NUnit.Framework;
 
 namespace PlaywrightTests.Tests
 {
@@ -21,10 +22,26 @@ namespace PlaywrightTests.Tests
                 Headless = false,
             });
 
-            var page = new LoginPage(await browser.NewPageAsync());
-            await page.GotoAsync("https://www.saucedemo.com/");
-            await page.ClickOnLoginAsync();
-            await Expect(page.GetError()).ToContainTextAsync("Epic sadface: Username is required");
+            var context = await browser.NewContextAsync();
+
+            await context.Tracing.StartAsync(new TracingStartOptions
+            {
+                Screenshots = true,
+                Snapshots = true,
+                Sources = true
+            });
+
+            var page = await context.NewPageAsync();
+
+            var loginPage = new LoginPage(page);
+            await loginPage.GotoAsync("https://www.saucedemo.com/");
+            await loginPage.ClickOnLoginAsync();
+            await Expect(loginPage.GetError()).ToContainTextAsync("Epic sadface: Username is required");
+
+            await context.Tracing.StopAsync(new TracingStopOptions
+            {
+                Path = "C:/Users/zenfo/Desktop/1/vs code/Practicum/3/PlaywrightTests/traces/EmptyFields.zip"
+            });
         }
     }
 }

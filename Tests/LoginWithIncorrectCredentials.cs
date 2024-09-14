@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 using PlaywrightTests.Pages;
+using NUnit.Framework;
 
 namespace PlaywrightTests.Tests
 {
@@ -20,12 +21,28 @@ namespace PlaywrightTests.Tests
             {
                 Headless = false,
             });
-            var page = new LoginPage(await browser.NewPageAsync());
-            await page.GotoAsync("https://www.saucedemo.com/");
-            await page.EnteringNameAsync("standard_user");
-            await page.EnteringPasswordAsync("wrong_password");
-            await page.ClickOnLoginAsync();
-            await Expect(page.GetError()).ToContainTextAsync("Epic sadface: Username and password do not match any user in this service");
+
+            var context = await browser.NewContextAsync();
+
+            await context.Tracing.StartAsync(new TracingStartOptions
+            {
+                Screenshots = true,
+                Snapshots = true,
+                Sources = true
+            });
+
+            var page = await context.NewPageAsync();
+            var loginPage = new LoginPage(page);
+            await loginPage.GotoAsync("https://www.saucedemo.com/");
+            await loginPage.EnteringNameAsync("standard_user");
+            await loginPage.EnteringPasswordAsync("wrong_password");
+            await loginPage.ClickOnLoginAsync();
+            await Expect(loginPage.GetError()).ToContainTextAsync("Epic sadface: Username and password do not match any user in this service");
+
+            await context.Tracing.StopAsync(new TracingStopOptions
+            {
+                Path = "C:/Users/zenfo/Desktop/1/vs code/Practicum/3/PlaywrightTests/traces/LoginWithIncorrect.zip"
+            });
         }
     }
 }

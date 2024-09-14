@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 using PlaywrightTests.Pages;
+using NUnit.Framework;
 
 namespace PlaywrightTests.Tests
 {
@@ -21,6 +22,14 @@ namespace PlaywrightTests.Tests
                 Headless = false,
             });
             var context = await browser.NewContextAsync();
+
+            await context.Tracing.StartAsync(new TracingStartOptions
+            {
+                Screenshots = true,
+                Snapshots = true,
+                Sources = true
+            });
+
             var page = await context.NewPageAsync();
 
             var loginPage = new LoginPage(page);
@@ -29,8 +38,13 @@ namespace PlaywrightTests.Tests
             await loginPage.EnteringPasswordAsync("secret_sauce");
             await loginPage.ClickOnLoginAsync();
             var inventoryPage = new InventoryPage(page);
-            await inventoryPage.SelectOptionAsync(["lohi"]); 
+            await inventoryPage.SelectOptionAsync(["lohi"]);
             await Expect(inventoryPage.GetSortContainer()).ToHaveValueAsync("lohi");
+
+            await context.Tracing.StopAsync(new TracingStopOptions
+            {
+                Path = "C:/Users/zenfo/Desktop/1/vs code/Practicum/3/PlaywrightTests/traces/ProductSorting.zip"
+            });
         }
     }
 }

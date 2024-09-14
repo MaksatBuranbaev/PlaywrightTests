@@ -17,10 +17,7 @@ namespace PlaywrightTests.Tests
         public async Task TestMethod1Async()
         {
             using var playwright = await Playwright.CreateAsync();
-            await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
-            {
-                Headless = false,
-            });
+            await using var browser = await playwright.Chromium.LaunchAsync();
             var context = await browser.NewContextAsync();
 
             await context.Tracing.StartAsync(new TracingStartOptions

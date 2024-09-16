@@ -37,6 +37,7 @@ namespace PlaywrightTests.Tests
             var inventoryPage = new InventoryPage(page);
             await inventoryPage.SelectOptionAsync(["lohi"]);
             await Expect(inventoryPage.GetSortContainer()).ToHaveValueAsync("lohi");
+            await Expect(inventoryPage.GetSortContainer()).ToHaveValueAsync("lohi");
 
             await context.Tracing.StopAsync(new TracingStopOptions
             {

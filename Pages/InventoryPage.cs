@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Threading.Tasks;
 using Microsoft.Playwright;
 
 namespace PlaywrightTests.Pages;

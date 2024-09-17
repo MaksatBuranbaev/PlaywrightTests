@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Playwright;
 
@@ -20,5 +21,21 @@ public class InventoryPage
     public ILocator GetSortContainer()
     {
         return _page.Locator(_productSortLocator);
+    }
+
+    public async Task<List<decimal>> GetPriceListAsync()
+    {
+        var priceElements = await _page.QuerySelectorAllAsync(".inventory_item_price");
+
+        List<decimal> prices = new List<decimal>();
+        foreach (var element in priceElements)
+        {
+            string priceText = await element.InnerTextAsync();
+            decimal price = Convert.ToDecimal(priceText.Replace("$", "").Trim(), CultureInfo.InvariantCulture);
+
+            prices.Add(price);
+        }
+
+        return prices;
     }
 }

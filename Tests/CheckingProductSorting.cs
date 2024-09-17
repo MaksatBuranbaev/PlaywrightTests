@@ -7,6 +7,7 @@ using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 using PlaywrightTests.Pages;
 using NUnit.Framework;
+using System.Globalization;
 
 namespace PlaywrightTests.Tests
 {
@@ -37,7 +38,20 @@ namespace PlaywrightTests.Tests
             var inventoryPage = new InventoryPage(page);
             await inventoryPage.SelectOptionAsync(["lohi"]);
             await Expect(inventoryPage.GetSortContainer()).ToHaveValueAsync("lohi");
-            await Expect(inventoryPage.GetSortContainer()).ToHaveValueAsync("lohi");
+
+            var priceElements = await page.QuerySelectorAllAsync(".inventory_item_price");
+
+            List<decimal> prices = new List<decimal>();
+            foreach (var element in priceElements)
+            {
+                string priceText = await element.InnerTextAsync();
+                decimal price = Convert.ToDecimal(priceText.Replace("$", "").Trim(), CultureInfo.InvariantCulture);
+
+                prices.Add(price);
+            }
+            List<decimal> sortedPrices = prices.OrderBy(price => price).ToList();
+            
+            CollectionAssert.AreEqual(prices, sortedPrices, "Цены продуктов не отсортированы по возрастанию");
 
             await context.Tracing.StopAsync(new TracingStopOptions
             {
